@@ -1,0 +1,73 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\fswiss\fcharset0 Helvetica-Oblique;
+}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww31500\viewh16080\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs28 \cf0 ESERCIZIO M2-EXCEL ESERCITAZIONE FINALE
+\f1\b0\fs24 \
+\
+
+\f2\i All\'92interno di questo file vi sono la struttura del file, la traccia dell\'92esercitazione del modulo su Excel e la spiegazione di come si \'e8 arrivati alla soluzione.
+\f1\i0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 ##\uc0\u55356 \u57263  Traccia:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 La regione Marche chiede di sviluppare un sistema per la gestione delle strutture ricettive del territorio. Abbiamo a disposizione due file: elencostrutture.xlsx contenente l\uc0\u700 elenco di tutte le informazioni sulle strutture (categoria, nome, indirizzo, ecc.). prezzimedi.csv contenente l\u700 elenco dei prezzi medi delle strutture per citt\'e0. \
+\
+ESERCIZIO 1:\
+All\uc0\u700 interno del file ELENCOSTRUTTURE, riempire le informazioni (celle azzurre) nella maschera del foglio RICERCA inserendo un men\'f9 a tendina nella cella C3 (cella gialla) per inserire il NOME STRUTTURA. Nelle celle colore GRIGIO inserire il numero totale delle strutture della regione e il numero di strutture presenti nella citt\'e0 della STRUTTURA CERCATA.\
+\
+ESERCIZIO 2:\
+Creare in un nuovo foglio dal nome PIVOT una tabella pivot per mostrare il numero di strutture per CATEGORIA filtrabile per CITTA\uc0\u700 .\
+\
+ESERCIZIO 3:\
+Aprire un nuovo file Excel dal nome MODELLO DATI.xlsx. Caricare la tabella presente nel foglio STRUTTURE RICETTIVE del file ELENCOSTRUTTURE e applicare, dove necessario, le trasformazioni tramite POWER QUERY (eventuali righe vuote, spazi, maiuscole/minuscole, ecc.). Inserire la tabella nel modello tramite POWERPIVOT. Caricare la tabella presente nel foglio PREZZI del file PREZZIMEDI. Trasformare/Preparare i dati tramite POWERQUERY. Inserire la tabella nel modello tramite POWERPIVOT. Creare la relazione tra le due tabelle.\
+\
+\
+## \uc0\u55357 \u56513  Struttura File\
+\
+| ESERCIZIO M2-EXCEL ESERCITAZIONE FINALE |\
+|\'97\'97\'97|\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 |\'97\'97\'97|\'97\'97\'97> elencostrutture.xlsx` | database originale dal quale sono stati estrapolati, puliti e riorganizzati i dati (categorie, nomi, indirizzi, citt\'e0, localit\'e0, indirizzo web ed indirizzo di posta elettronica) per gli esercizi n\'b01 e 2
+\fs22 .\
+
+\fs24 |\'97\'97\'97|\'97\'97\'97> prezzimedi.xlsx` | Database originale dal quale sono stati estrapolati, puliti e riorganizzati i dati (citt\'e0 e prezzi medi delle strutture ricettive) per l\'92esercizio n\'b03
+\fs22 .
+\fs24 \
+|\'97\'97\'97|\'97\'97\'97> Esercizi | cartella contenente i tre file relativi ai tre esercizi della traccia.\
+|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97> Esercizio_1.xlsx | \
+|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97> Esercizio_2.xlsx | \
+|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97|\'97\'97\'97> MODELLO_DATI.xlsx | \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\
+## \uc0\u55357 \u56615  Passi Eseguiti\
+\
+1. Pulizia dati per file \'93elencostrutture.xlsx\'94 (Power Query).\
+\
+2. Men\'f9 a tendina per ricerca struttura con formule indicate di seguito.\
+\
+3. Creazione tabella pivot e grafico pivot per ricerca intelligente delle strutture ricettive divise filtrabili con 3 slicer. \
+\
+4. Pulizia file \'93prezzimedi.xlsx\'94.\
+\
+5. Merge tabelle Strutture ricettive CLEAN e Prezzi medi CLEAN (Power Query):\
+\
+6. Creazione Tabella e grafico Pivot per ricerca di strutture ricettive riorganizzate per citt\'e0 e filtrabili con 3 slicer. \
+\
+\
+## \uc0\u55357 \u56541  Note Tecniche\
+\
+- **Versione Excel**: Microsoft 365 (Mac)\
+\
+\
+## \uc0\u55357 \u56420  Autore: \
+\
+Francesco Lagan\'e0  \
+Data: 26/01/2026\
+}
