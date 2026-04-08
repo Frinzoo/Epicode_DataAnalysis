@@ -1,0 +1,18 @@
+# Dataset (troppo grande per GitHub)
+owid-covid-data.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Log
+*.log
+uvicorn.log
