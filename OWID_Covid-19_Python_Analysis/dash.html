@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard COVID-19</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{--bg:#f7f6f2;--surface:#f9f8f5;--surface-2:#fff;--border:#d4d1ca;--text:#28251d;--text-muted:#7a7974;--text-faint:#bab9b4;--primary:#01696f;--primary-hl:#cedcd8;--shadow-sm:0 1px 3px rgba(40,37,29,.08);--shadow-md:0 4px 16px rgba(40,37,29,.10);--radius:0.75rem;--radius-sm:0.375rem}
+[data-theme="dark"]{--bg:#171614;--surface:#1c1b19;--surface-2:#201f1d;--border:#393836;--text:#cdccca;--text-muted:#797876;--text-faint:#5a5957;--primary:#4f98a3;--primary-hl:#313b3b;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 16px rgba(0,0,0,.4)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',sans-serif;font-size:1rem;background:var(--bg);color:var(--text);min-height:100dvh;line-height:1.6;overflow-x:hidden}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.logo{display:flex;align-items:center;gap:.75rem}
+.logo svg{color:var(--primary)}
+.logo h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-weight:300;color:var(--text-muted)}
+.theme-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .7rem;cursor:pointer;color:var(--text-muted);font-size:.85rem;transition:all .18s}
+.theme-btn:hover{border-color:var(--primary);color:var(--primary)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+main{max-width:1320px;margin:0 auto;padding:2rem 1.5rem;overflow-x:hidden}
+.counter-hero{background:linear-gradient(135deg,var(--primary) 0%,#0c4e54 100%);border-radius:var(--radius);padding:2.5rem 2rem;margin-bottom:2rem;text-align:center;color:#fff;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+.counter-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 50%,rgba(255,255,255,.06) 0%,transparent 60%)}
+.counter-label{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;opacity:.8;margin-bottom:.5rem}
+.counter-value{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1}
+.counter-sub{font-size:.85rem;opacity:.7;margin-top:.5rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;box-shadow:var(--shadow-sm);transition:box-shadow .18s}
+.kpi-card:hover{box-shadow:var(--shadow-md)}
+.kpi-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.35rem}
+.kpi-value{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary)}
+.kpi-sub{font-size:.78rem;color:var(--text-faint);margin-top:.2rem}
+.tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.25rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:.875rem;font-weight:500;transition:all .18s}
+.tab-btn:hover{border-color:var(--primary);color:var(--primary)}
+.tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;width:100%;overflow:hidden}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow-sm);overflow:hidden;min-width:0}
+.chart-card.full{grid-column:1/-1;min-width:0;overflow:hidden}
+.chart-title{font-size:.9rem;font-weight:600;margin-bottom:.75rem;color:var(--text)}
+.table-wrapper{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.875rem}
+thead tr{background:var(--surface-2);border-bottom:2px solid var(--border)}
+th{padding:.75rem 1rem;text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);white-space:nowrap}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-2)}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+.badge{display:inline-block;padding:.15rem .6rem;border-radius:999px;font-size:.72rem;font-weight:600;background:var(--primary-hl);color:var(--primary)}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:1rem}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--text-muted);font-size:.9rem}
+.filters{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:.3rem}
+.filter-group label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);font-weight:600}
+select,input[type=text]{border:1px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .75rem;background:var(--surface-2);color:var(--text);font-size:.875rem}
+.section-sub{font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem}
+.owid-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-muted);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.3rem .75rem;margin-bottom:1rem}
+.owid-badge a{color:var(--primary);text-decoration:none;font-weight:600}
+.owid-badge a:hover{text-decoration:underline}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;text-align:center}
+.stat-box-val{font-size:1.3rem;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums}
+.stat-box-lbl{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:.85rem;color:var(--text-muted);box-shadow:var(--shadow-sm)}
+footer strong{color:var(--primary)}
+@media(max-width:1100px){.chart-grid{grid-template-columns:1fr}}
+@media(max-width:600px){main{padding:1rem .75rem}.kpi-grid{grid-template-columns:1fr 1fr}.tabs{gap:.35rem}.tab-btn{padding:.4rem .75rem;font-size:.8rem}}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><p>Caricamento dati COVID-19 da OWID...</p></div>
+<header>
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="14" cy="14" r="6"/><circle cx="14" cy="14" r="11" stroke-dasharray="3 2"/>
+      <line x1="14" y1="3" x2="14" y2="8"/><line x1="14" y1="20" x2="14" y2="25"/>
+      <line x1="3" y1="14" x2="8" y2="14"/><line x1="20" y1="14" x2="25" y2="14"/>
+    </svg>
+    <h1>COVID-19 <span>Dashboard</span></h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span style="font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:.4rem"><span class="status-dot"></span>API live</span>
+    <button class="theme-btn" id="theme-toggle">&#127769; Dark</button>
+  </div>
+</header>
+<main>
+  <div class="counter-hero">
+    <div class="counter-label">Casi totali dall'inizio della pandemia</div>
+    <div class="counter-value" id="counter-display">0</div>
+    <div class="counter-sub">Fonte: Our World in Data &middot; aggiornato al <span id="counter-date">&mdash;</span></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Asia</div><div class="kpi-value" id="kpi-asia">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Europa</div><div class="kpi-value" id="kpi-eu">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nord America</div><div class="kpi-value" id="kpi-na">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Sud America</div><div class="kpi-value" id="kpi-sa">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Africa</div><div class="kpi-value" id="kpi-africa">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Oceania</div><div class="kpi-value" id="kpi-oceania">&mdash;</div><div class="kpi-sub">Totale cumulativo</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+    <button class="tab-btn" onclick="showTab('paesi',this)">Paesi</button>
+    <button class="tab-btn" onclick="showTab('europa',this)">Europa</button>
+    <button class="tab-btn" onclick="showTab('dataset',this)">Dataset</button>
+  </div>
+  <div class="tab-panel active" id="tab-overview">
+    <div class="chart-card full" style="margin-bottom:1.25rem">
+      <div class="chart-title">Distribuzione casi totali per continente</div>
+      <div id="chart-donut" style="height:500px;width:100%"></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="tab-paesi">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-box-val" id="stat-paesi">&mdash;</div><div class="stat-box-lbl">Paesi analizzati</div></div>
+      <div class="stat-box"><div class="stat-box-val">6</div><div class="stat-box-lbl">Continenti monitorati</div></div>
+      <div class="stat-box"><div class="stat-box-val" id="stat-update">&mdash;</div><div class="stat-box-lbl">Ultimo aggiornamento</div></div>
+      <div class="stat-box"><div class="stat-box-val" id="stat-deaths">&mdash;</div><div class="stat-box-lbl">Decessi totali mondo</div></div>
+    </div>
+    <div class="chart-card full" style="margin-bottom:1.25rem">
+      <div class="chart-title">Casi totali per paese</div>
+      <div id="chart-paesi-pie" style="height:520px;width:100%"></div>
+    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <label>Filtra continente</label>
+        <select id="filter-continent" onchange="renderPaesiTable();renderPaesiPie()">
+          <option value="">Tutti</option><option value="Africa">Africa</option><option value="Asia">Asia</option>
+          <option value="Europe">Europa</option><option value="North America">Nord America</option>
+          <option value="South America">Sud America</option><option value="Oceania">Oceania</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Cerca paese</label>
+        <input type="text" id="search-paese" oninput="renderPaesiTable()" placeholder="es. Italy...">
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table id="tbl-paesi">
+        <thead><tr><th>#</th><th>Paese</th><th>Continente</th><th class="num">Casi totali</th><th class="num">Decessi totali</th><th class="num">Ultimo aggiorn.</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="tab-panel" id="tab-europa">
+    <div class="filters">
+      <div class="filter-group"><label>Anno</label>
+        <select id="sel-anno" onchange="updateEuropaCharts()">
+          <option value="2020">2020</option><option value="2021" selected>2021</option>
+          <option value="2022">2022</option><option value="2023">2023</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Nazione</label>
+        <select id="sel-nazione" onchange="updateEuropaCharts()">
+          <option value="Italy,Germany,France,Spain">Tutte</option>
+          <option value="Italy">Italia</option><option value="Germany">Germania</option>
+          <option value="France">Francia</option><option value="Spain">Spagna</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card full"><div class="chart-title">Trend nuovi casi mensili</div><div id="chart-trend" style="height:320px;width:100%"></div></div>
+      <div class="chart-card"><div class="chart-title">Pazienti ospedalizzati</div><div id="chart-hosp" style="height:320px;width:100%"></div></div>
+      <div class="chart-card"><div class="chart-title">Distribuzione pazienti ICU (boxplot)</div><div id="chart-icu" style="height:320px;width:100%"></div></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="tab-dataset">
+    <div class="owid-badge">
+      Dati forniti da <a href="https://github.com/owid/covid-19-data" target="_blank" rel="noopener">Our World in Data (OWID)</a> &mdash; aggiornati regolarmente
+    </div>
+    <div class="filters">
+      <div class="filter-group"><label>Anno</label>
+        <select id="ds-anno" onchange="renderDataset()">
+          <option value="2020">2020</option><option value="2021" selected>2021</option>
+          <option value="2022">2022</option><option value="2023">2023</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Paese</label>
+        <select id="ds-paese" onchange="renderDataset()"><option value="Italy">Italy</option></select>
+      </div>
+    </div>
+    <p class="section-sub" id="ds-info">Mostra le righe del dataset originale filtrate per anno e paese.</p>
+    <div class="table-wrapper">
+      <table id="tbl-dataset">
+        <thead><tr>
+          <th>Data</th><th>Paese</th><th>Continente</th>
+          <th class="num">Casi totali</th><th class="num">Nuovi casi</th>
+          <th class="num">Decessi totali</th><th class="num">Nuovi decessi</th>
+          <th class="num">Ospedalizzati</th><th class="num">ICU</th>
+          <th class="num">Vaccinati totali</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>Grazie dell'attenzione &mdash; <strong>Francesco Lagana</strong></p>
+</footer>
+<script>
+var API_URL = 'http://127.0.0.1:8000/casi-continenti';
+var CSV_URL = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv';
+var CONTINENTS = ['Africa','Asia','Europe','North America','South America','Oceania'];
+var COLORS = ['#01696f','#4f98a3','#d19900','#a12c7b','#006494','#da7101'];
+var allData = [];
+var apiData = [];
+var isDark = false;
+var paesiData = {};
+
+function fmt(n) { return (n != null && n !== '') ? Number(n).toLocaleString('it-IT') : '-'; }
+function fmtB(n) {
+  if (!n || isNaN(n)) return '-';
+  n = parseFloat(n);
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  return fmt(n);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', function() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  this.textContent = isDark ? 'Light' : 'Dark';
+  redrawCharts();
+});
+
+function pL(extra) {
+  var base = {
+    paper_bgcolor:'transparent', plot_bgcolor:'transparent',
+    font:{family:'Inter,sans-serif', color: isDark ? '#cdccca' : '#28251d', size:12},
+    margin:{t:10,r:10,b:40,l:55},
+    xaxis:{gridcolor: isDark ? '#393836' : '#d4d1ca', linecolor: isDark ? '#393836' : '#d4d1ca'},
+    yaxis:{gridcolor: isDark ? '#393836' : '#d4d1ca', linecolor: isDark ? '#393836' : '#d4d1ca'},
+    legend:{bgcolor:'transparent'},
+    colorway: COLORS
+  };
+  if (extra) { for (var k in extra) base[k] = extra[k]; }
+  return base;
+}
+
+function parseCSV(text) {
+  var lines = text.split('\n');
+  var headers = lines[0].split(',');
+  var result = [];
+  for (var i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    var vals = []; var cur = ''; var inQ = false;
+    for (var c = 0; c < lines[i].length; c++) {
+      var ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    vals.push(cur);
+    var obj = {};
+    for (var h = 0; h < headers.length; h++) obj[headers[h].trim()] = (vals[h] || '').trim();
+    result.push(obj);
+  }
+  return result;
+}
+
+function animateCounter(target, duration) {
+  duration = duration || 3000;
+  var el = document.getElementById('counter-display');
+  var start = performance.now();
+  function step(now) {
+    var p = Math.min((now - start) / duration, 1);
+    var ease = p < .5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+    el.textContent = Math.round(ease * target).toLocaleString('it-IT');
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString('it-IT');
+  }
+  requestAnimationFrame(step);
+}
+
+function loadAll() {
+  Promise.all([fetch(API_URL), fetch(CSV_URL)])
+    .then(function(responses) {
+      return Promise.all([responses[0].json(), responses[1].text()]);
+    })
+    .then(function(results) {
+      apiData = results[0];
+      allData = parseCSV(results[1]);
+      document.getElementById('loading').style.display = 'none';
+      init();
+    })
+    .catch(function(e) {
+      document.getElementById('loading').innerHTML = '<p style="color:#a12c7b;padding:2rem;text-align:center">Errore: verifica che l&#39;API sia attiva su http://127.0.0.1:8000</p>';
+    });
+}
+
+function init() {
+  var worldRows = allData.filter(function(r) { return r.location === 'World' && r.total_cases !== ''; });
+  worldRows.sort(function(a,b) { return b.date.localeCompare(a.date); });
+  var wr = worldRows[0];
+  var worldTotal = parseFloat(wr ? wr.total_cases : 0) || 0;
+  animateCounter(worldTotal);
+  document.getElementById('counter-date').textContent = wr ? wr.date : '-';
+  var km = {Africa:'kpi-africa', Asia:'kpi-asia', Europe:'kpi-eu', 'North America':'kpi-na', 'South America':'kpi-sa', Oceania:'kpi-oceania'};
+  apiData.forEach(function(r) { if (km[r.location]) document.getElementById(km[r.location]).textContent = fmtB(r.total_cases); });
+  var tmp = {};
+  allData.filter(function(r) { return r.continent && CONTINENTS.indexOf(r.continent) >= 0 && r.total_cases !== ''; })
+    .forEach(function(r) { if (!tmp[r.location] || r.date > tmp[r.location].date) tmp[r.location] = r; });
+  paesiData = tmp;
+  document.getElementById('stat-paesi').textContent = Object.keys(paesiData).length;
+  document.getElementById('stat-update').textContent = wr ? wr.date : '-';
+  document.getElementById('stat-deaths').textContent = fmtB(parseFloat(wr ? wr.total_deaths : 0) || 0);
+  var allLoc = [];
+  allData.forEach(function(r) { if (r.location && allLoc.indexOf(r.location) < 0) allLoc.push(r.location); });
+  allLoc.sort();
+  var dsPaese = document.getElementById('ds-paese');
+  dsPaese.innerHTML = allLoc.map(function(l) { return '<option value="' + l + '"' + (l === 'Italy' ? ' selected' : '') + '>' + l + '</option>'; }).join('');
+  renderDonut(); renderPaesiTable(); renderPaesiPie(); updateEuropaCharts(); renderDataset();
+}
+
+function renderDonut() {
+  var sorted = apiData.slice().sort(function(a,b) { return b.total_cases - a.total_cases; });
+  Plotly.newPlot('chart-donut', [{
+    type:'pie', hole:.5,
+    labels: sorted.map(function(r){return r.location;}),
+    values: sorted.map(function(r){return r.total_cases;}),
+    marker:{colors:COLORS},
+    textinfo:'label+percent', textposition:'outside', automargin:true,
+    hovertemplate:'<b>%{label}</b><br>Casi: %{value:,.0f}<br>Quota: %{percent}<extra></extra>',
+    textfont:{size:13}
+  }], Object.assign(pL(), {
+    margin:{t:40,r:120,b:40,l:120},
+    legend:{orientation:'v',x:1.02,y:.5,font:{size:13}},
+    annotations:[{text:'<b>Continenti</b>',x:.5,y:.5,font:{size:15,color:isDark?'#cdccca':'#28251d'},showarrow:false}]
+  }), {responsive:true});
+}
+
+function renderPaesiPie() {
+  var cf = document.getElementById('filter-continent').value;
+  var rows = Object.values(paesiData);
+  if (cf) rows = rows.filter(function(r){return r.continent === cf;});
+  rows.sort(function(a,b){return parseFloat(b.total_cases||0)-parseFloat(a.total_cases||0);});
+  var top = rows.slice(0,30);
+  Plotly.newPlot('chart-paesi-pie', [{
+    type:'pie', hole:.35,
+    labels: top.map(function(r){return r.location;}),
+    values: top.map(function(r){return parseFloat(r.total_cases||0);}),
+    marker:{colors: top.map(function(_,i){return 'hsl('+(180+i*8)+',50%,'+(40+i%3*8)+'%)'})},
+    textinfo:'label', automargin:true,
+    hovertemplate:'<b>%{label}</b><br>Casi totali: %{value:,.0f}<br>Quota: %{percent}<extra></extra>',
+    textfont:{size:11}
+  }], Object.assign(pL(), {
+    margin:{t:20,r:20,b:20,l:20}, showlegend:false,
+    annotations:[{text:'<b>Top 30</b><br>Paesi',x:.5,y:.5,font:{size:13,color:isDark?'#cdccca':'#28251d'},showarrow:false,align:'center'}]
+  }), {responsive:true});
+}
+
+function renderPaesiTable() {
+  var cf = document.getElementById('filter-continent').value;
+  var sf = document.getElementById('search-paese').value.toLowerCase();
+  var rows = Object.values(paesiData);
+  if (cf) rows = rows.filter(function(r){return r.continent===cf;});
+  if (sf) rows = rows.filter(function(r){return r.location.toLowerCase().indexOf(sf)>=0;});
+  rows.sort(function(a,b){return parseFloat(b.total_cases||0)-parseFloat(a.total_cases||0);});
+  document.querySelector('#tbl-paesi tbody').innerHTML = rows.map(function(r,i){
+    return '<tr><td style="color:var(--text-faint);font-size:.8rem">'+(i+1)+'</td><td><strong>'+r.location+'</strong></td><td><span class="badge">'+r.continent+'</span></td><td class="num">'+fmt(parseFloat(r.total_cases)||0)+'</td><td class="num">'+fmt(parseFloat(r.total_deaths)||0)+'</td><td class="num" style="font-size:.8rem;color:var(--text-muted)">'+(r.date||'-')+'</td></tr>';
+  }).join('');
+}
+
+function updateEuropaCharts() {
+  var anno = document.getElementById('sel-anno').value;
+  var nazioni = document.getElementById('sel-nazione').value.split(',');
+  Plotly.newPlot('chart-trend', nazioni.map(function(n){
+    var rows = allData.filter(function(r){return r.location===n&&r.date&&r.date.indexOf(anno)===0&&r.new_cases_smoothed!=='';});
+    return {type:'scatter',mode:'lines',name:n,x:rows.map(function(r){return r.date;}),y:rows.map(function(r){return parseFloat(r.new_cases_smoothed)||0;}),line:{width:2}};
+  }), pL({yaxis:{title:'Nuovi casi'}}), {responsive:true});
+  Plotly.newPlot('chart-hosp', nazioni.map(function(n){
+    var rows = allData.filter(function(r){return r.location===n&&r.date&&r.date.indexOf(anno)===0&&r.hosp_patients!=='';});
+    return {type:'scatter',mode:'lines',name:n,x:rows.map(function(r){return r.date;}),y:rows.map(function(r){return parseFloat(r.hosp_patients)||0;}),line:{width:2}};
+  }), pL({yaxis:{title:'Pazienti ospedalizzati'}}), {responsive:true});
+  Plotly.newPlot('chart-icu', nazioni.map(function(n){
+    var vals = allData.filter(function(r){return r.location===n&&r.date&&r.date.indexOf(anno)===0&&r.icu_patients!=='';}).map(function(r){return parseFloat(r.icu_patients)||0;});
+    return {type:'box',name:n,y:vals,boxpoints:'outliers'};
+  }), pL({yaxis:{title:'Pazienti ICU'}}), {responsive:true});
+}
+
+function renderDataset() {
+  var anno = document.getElementById('ds-anno').value;
+  var paese = document.getElementById('ds-paese').value;
+  var rows = allData.filter(function(r){return r.location===paese&&r.date&&r.date.indexOf(anno)===0;});
+  document.getElementById('ds-info').textContent = 'Dataset OWID - ' + paese + ' - ' + anno + ' - ' + rows.length + ' righe';
+  document.querySelector('#tbl-dataset tbody').innerHTML = rows.map(function(r){
+    return '<tr><td style="font-size:.8rem;white-space:nowrap">'+r.date+'</td><td>'+r.location+'</td><td style="font-size:.8rem;color:var(--text-muted)">'+(r.continent||'-')+'</td><td class="num">'+fmt(parseFloat(r.total_cases)||0)+'</td><td class="num">'+fmt(parseFloat(r.new_cases)||0)+'</td><td class="num">'+fmt(parseFloat(r.total_deaths)||0)+'</td><td class="num">'+fmt(parseFloat(r.new_deaths)||0)+'</td><td class="num">'+(r.hosp_patients&&r.hosp_patients!==''?fmt(parseFloat(r.hosp_patients)):'-')+'</td><td class="num">'+(r.icu_patients&&r.icu_patients!==''?fmt(parseFloat(r.icu_patients)):'-')+'</td><td class="num">'+(r.total_vaccinations&&r.total_vaccinations!==''?fmt(parseFloat(r.total_vaccinations)):'-')+'</td></tr>';
+  }).join('');
+}
+
+function redrawCharts() { if (apiData.length) { renderDonut(); renderPaesiPie(); updateEuropaCharts(); } }
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='europa') updateEuropaCharts();
+  if (id==='overview') renderDonut();
+  if (id==='paesi') renderPaesiPie();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+window.addEventListener('load', function(){ window.scrollTo(0,0); });
+loadAll();
+</script>
+</body>
+</html>
